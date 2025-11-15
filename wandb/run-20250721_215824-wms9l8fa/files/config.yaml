@@ -1,0 +1,80 @@
+_wandb:
+    value:
+        cli_version: 0.21.0
+        e:
+            7j2lo3yd1zitqd5l0pbz9jsgx7mxok53:
+                codePath: training.py
+                codePathLocal: training.py
+                cpu_count: 24
+                cpu_count_logical: 48
+                cudaVersion: "12.4"
+                disk:
+                    /:
+                        total: "8579448832"
+                        used: "898863104"
+                email: isen_naiken@etu.u-bourgogne.fr
+                executable: /soft/c7/spack/0.18.0/packages/linux-centos7-skylake_avx512/python/3.9.10/gcc/11.2.0/z22cwgnmgo4wib6imqjxif7li2wqhhvc/bin/python
+                git:
+                    commit: 24a132f442f303c472bbb94781ed2866440cdcd2
+                    remote: git@github.com:DenDeen/unet_gang.git
+                gpu: Tesla V100-PCIE-16GB
+                gpu_count: 2
+                gpu_nvidia:
+                    - architecture: Volta
+                      cudaCores: 5120
+                      memoryTotal: "17179869184"
+                      name: Tesla V100-PCIE-16GB
+                      uuid: GPU-ad4b066d-7d63-e548-f91a-62efaba19b51
+                    - architecture: Volta
+                      cudaCores: 5120
+                      memoryTotal: "17179869184"
+                      name: Tesla V100-PCIE-16GB
+                      uuid: GPU-2d21bf84-fbde-9028-65da-591691fca461
+                host: webern07.u-bourgogne.fr
+                memory:
+                    total: "99712872448"
+                os: Linux-3.10.0-1160.6.1.el7.x86_64-x86_64-with-glibc2.17
+                program: /beegfs/data/work/c-2iia/in156281/unet_gang/training.py
+                python: CPython 3.9.10
+                root: /beegfs/data/work/c-2iia/in156281/unet_gang
+                startedAt: "2025-07-21T19:58:24.611894Z"
+                writerId: 7j2lo3yd1zitqd5l0pbz9jsgx7mxok53
+        m: []
+        python_version: 3.9.10
+        t:
+            "1":
+                - 1
+                - 5
+                - 53
+            "2":
+                - 1
+                - 5
+                - 53
+            "3":
+                - 16
+            "4": 3.9.10
+            "5": 0.21.0
+            "12": 0.21.0
+            "13": linux-x86_64
+batch_size:
+    value: 8
+device:
+    value: cuda
+input_filenames:
+    value:
+        - PET.nii.gz
+        - SEG.nii.gz
+learning_rate:
+    value: 0.001
+model_save_path:
+    value: output/models/unet_model.pth
+num_epochs:
+    value: 3
+num_workers:
+    value: 4
+random_seed:
+    value: 42
+slice_axis:
+    value: 2
+validation_split:
+    value: 0.3

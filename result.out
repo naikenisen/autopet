@@ -1,0 +1,110 @@
+Starter begin : webern07.u-bourgogne.fr(256166)
+lun. juil. 21 22:02:01 CEST 2025
+Version CentOS : 7.7
+Starter(256166): PATH=/usr/ccub/sge/scripts:/tmp3/5223778.1.gpu:/soft/c7/spack/0.18.0/packages/linux-centos7-skylake_avx512/python/3.9.10/gcc/11.2.0/z22cwgnmgo4wib6imqjxif7li2wqhhvc/bin:/usr/lib64/qt-3.3/bin:/soft/c7/modules/4.1.2/bin:/usr/ccub/sge-8.1.8/bin:/usr/ccub/sge-8.1.8/bin/lx-amd64:/bin:/usr/bin:/usr/sbin:/etc:/usr/ccub/bin:/usr/local/bin:.:/opt/dell/srvadmin/bin
+Starter exec(256166) : '/usr/ccub/sge-8.1.8/ccub/spool/webern07/job_scripts/5223778'
+wandb: Appending key for api.wandb.ai to your netrc file: /user2/c-2iia/in156281/.netrc
+wandb: Currently logged in as: isen_naiken (isen_naiken-chu-dijon-bourgogne) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.21.0
+wandb: Run data is saved locally in /beegfs/data/work/c-2iia/in156281/wandb/run-20250721_220220-n9c1sobz
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run copper-plasma-2
+wandb:  View project at https://wandb.ai/isen_naiken-chu-dijon-bourgogne/unet_gang
+wandb:  View run at https://wandb.ai/isen_naiken-chu-dijon-bourgogne/unet_gang/runs/n9c1sobz
+Configuration: 
+MODEL_SAVE_PATH: output/models/unet_model.pth
+INPUT_FILENAMES: ['PET.nii.gz', 'SEG.nii.gz']
+SLICE_AXIS: 2
+BATCH_SIZE: 8
+NUM_WORKERS: 4
+LEARNING_RATE: 0.001
+VALIDATION_SPLIT: 0.3
+NUM_EPOCHS: 3
+RANDOM_SEED: 42
+DEVICE: cuda
+
+Loading NIfTI files : 0patients [00:00, ?patients/s]Loading NIfTI files : 19patients [00:00, 183.74patients/s]Loading NIfTI files : 39patients [00:00, 191.99patients/s]Loading NIfTI files : 59patients [00:00, 180.44patients/s]Loading NIfTI files : 78patients [00:00, 182.84patients/s]Loading NIfTI files : 97patients [00:00, 181.50patients/s]Loading NIfTI files : 118patients [00:00, 188.45patients/s]Loading NIfTI files : 138patients [00:00, 189.67patients/s]Loading NIfTI files : 158patients [00:00, 191.11patients/s]Loading NIfTI files : 179patients [00:00, 194.41patients/s]Loading NIfTI files : 199patients [00:01, 184.33patients/s]Loading NIfTI files : 219patients [00:01, 186.54patients/s]Loading NIfTI files : 238patients [00:01, 183.01patients/s]Loading NIfTI files : 257patients [00:01, 181.14patients/s]Loading NIfTI files : 276patients [00:01, 164.41patients/s]Loading NIfTI files : 293patients [00:01, 154.61patients/s]Loading NIfTI files : 309patients [00:01, 154.12patients/s]Loading NIfTI files : 329patients [00:01, 165.50patients/s]Loading NIfTI files : 350patients [00:01, 175.97patients/s]Loading NIfTI files : 369patients [00:02, 177.90patients/s]Loading NIfTI files : 390patients [00:02, 186.60patients/s]Loading NIfTI files : 410patients [00:02, 188.71patients/s]Loading NIfTI files : 432patients [00:02, 195.45patients/s]Loading NIfTI files : 453patients [00:02, 197.43patients/s]Loading NIfTI files : 473patients [00:02, 196.36patients/s]Loading NIfTI files : 493patients [00:02, 193.91patients/s]Loading NIfTI files : 513patients [00:02, 188.10patients/s]Loading NIfTI files : 533patients [00:02, 189.66patients/s]Loading NIfTI files : 553patients [00:03, 185.95patients/s]Loading NIfTI files : 573patients [00:03, 188.98patients/s]Loading NIfTI files : 594patients [00:03, 192.72patients/s]Loading NIfTI files : 614patients [00:03, 177.85patients/s]Loading NIfTI files : 630patients [00:03, 181.91patients/s]
+Loading NIfTI files : 0patients [00:00, ?patients/s]Loading NIfTI files : 19patients [00:00, 182.30patients/s]Loading NIfTI files : 39patients [00:00, 190.36patients/s]Loading NIfTI files : 59patients [00:00, 193.74patients/s]Loading NIfTI files : 79patients [00:00, 192.64patients/s]Loading NIfTI files : 99patients [00:00, 193.95patients/s]Loading NIfTI files : 121patients [00:00, 198.58patients/s]Loading NIfTI files : 141patients [00:00, 197.82patients/s]Loading NIfTI files : 161patients [00:00, 181.01patients/s]Loading NIfTI files : 180patients [00:00, 176.91patients/s]Loading NIfTI files : 201patients [00:01, 185.20patients/s]Loading NIfTI files : 222patients [00:01, 191.39patients/s]Loading NIfTI files : 242patients [00:01, 190.28patients/s]Loading NIfTI files : 262patients [00:01, 186.86patients/s]Loading NIfTI files : 270patients [00:01, 188.76patients/s]
+U-Net instantiated.
+Loss function: BCEWithLogitsLoss
+Optimizer: AdamW with lr=0.001
+Starter begin : webern07.u-bourgogne.fr(261526)
+lun. juil. 21 22:48:13 CEST 2025
+Version CentOS : 7.7
+Starter(261526): PATH=/usr/ccub/sge/scripts:/tmp3/5223779.1.gpu:/usr/lib64/qt-3.3/bin:/soft/c7/modules/4.1.2/bin:/usr/ccub/sge-8.1.8/bin:/usr/ccub/sge-8.1.8/bin/lx-amd64:/bin:/usr/bin:/usr/sbin:/etc:/usr/ccub/bin:/usr/local/bin:.
+Starter exec(261526) : '/usr/ccub/sge-8.1.8/ccub/spool/webern07/job_scripts/5223779'
+wandb: Appending key for api.wandb.ai to your netrc file: /user2/c-2iia/in156281/.netrc
+wandb: Currently logged in as: isen_naiken (isen_naiken-chu-dijon-bourgogne) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.21.0
+wandb: Run data is saved locally in /beegfs/data/work/c-2iia/in156281/wandb/run-20250721_224902-873y24gx
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run dainty-wildflower-3
+wandb:  View project at https://wandb.ai/isen_naiken-chu-dijon-bourgogne/unet_gang
+wandb:  View run at https://wandb.ai/isen_naiken-chu-dijon-bourgogne/unet_gang/runs/873y24gx
+Configuration: 
+MODEL_SAVE_PATH: output/models/unet_model.pth
+INPUT_FILENAMES: ['PET.nii.gz', 'SEG.nii.gz']
+SLICE_AXIS: 2
+BATCH_SIZE: 16
+NUM_WORKERS: 8
+LEARNING_RATE: 0.001
+VALIDATION_SPLIT: 0.3
+NUM_EPOCHS: 20
+RANDOM_SEED: 42
+DEVICE: cuda
+
+Loading NIfTI files : 0patients [00:00, ?patients/s]Loading NIfTI files : 20patients [00:00, 191.72patients/s]Loading NIfTI files : 40patients [00:00, 176.76patients/s]Loading NIfTI files : 58patients [00:00, 174.53patients/s]Loading NIfTI files : 78patients [00:00, 181.72patients/s]Loading NIfTI files : 99patients [00:00, 190.38patients/s]Loading NIfTI files : 120patients [00:00, 193.81patients/s]Loading NIfTI files : 140patients [00:00, 191.93patients/s]Loading NIfTI files : 157patients [00:00, 189.73patients/s]
+Loading NIfTI files : 0patients [00:00, ?patients/s]Loading NIfTI files : 16patients [00:00, 156.24patients/s]Loading NIfTI files : 36patients [00:00, 168.27patients/s]Loading NIfTI files : 57patients [00:00, 183.76patients/s]Loading NIfTI files : 68patients [00:00, 180.51patients/s]
+U-Net instantiated.
+Loss function: BCEWithLogitsLoss
+Optimizer: AdamW with lr=0.001
+Epoch 1/20 - Training Batch 1/3383 - Loss: 0.7230
+Epoch 1/20 - Training Batch 2/3383 - Loss: 0.6189
+An error occurred: CUDA out of memory. Tried to allocate 626.00 MiB. GPU 0 has a total capacity of 15.77 GiB of which 436.19 MiB is free. Including non-PyTorch memory, this process has 15.34 GiB memory in use. Of the allocated memory 13.46 GiB is allocated by PyTorch, and 1.51 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Traceback (most recent call last):
+  File "/beegfs/data/work/c-2iia/in156281/unet_gang/training.py", line 156, in <module>
+    train_loss = train_epoch(
+  File "/beegfs/data/work/c-2iia/in156281/unet_gang/src/model/training_utils.py", line 33, in train_epoch
+    loss.backward()
+  File "/user2/c-2iia/in156281/.local/lib/python3.9/site-packages/torch/_tensor.py", line 626, in backward
+    torch.autograd.backward(
+  File "/user2/c-2iia/in156281/.local/lib/python3.9/site-packages/torch/autograd/__init__.py", line 347, in backward
+    _engine_run_backward(
+  File "/user2/c-2iia/in156281/.local/lib/python3.9/site-packages/torch/autograd/graph.py", line 823, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 626.00 MiB. GPU 0 has a total capacity of 15.77 GiB of which 436.19 MiB is free. Including non-PyTorch memory, this process has 15.34 GiB memory in use. Of the allocated memory 13.46 GiB is allocated by PyTorch, and 1.51 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mdainty-wildflower-3[0m at: [34mhttps://wandb.ai/isen_naiken-chu-dijon-bourgogne/unet_gang/runs/873y24gx[0m
+[1;34mwandb[0m: Find logs at: [1;35m../../../beegfs/data/work/c-2iia/in156281/wandb/run-20250721_224902-873y24gx/logs[0m
+Starter(261526): Return code=1
+Starter end(261526)
+Starter begin : webern07.u-bourgogne.fr(263053)
+lun. juil. 21 22:59:33 CEST 2025
+Version CentOS : 7.7
+Starter(263053): PATH=/usr/ccub/sge/scripts:/tmp3/5223780.1.gpu:/usr/lib64/qt-3.3/bin:/soft/c7/modules/4.1.2/bin:/usr/ccub/sge-8.1.8/bin:/usr/ccub/sge-8.1.8/bin/lx-amd64:/bin:/usr/bin:/usr/sbin:/etc:/usr/ccub/bin:/usr/local/bin:.
+Starter exec(263053) : '/usr/ccub/sge-8.1.8/ccub/spool/webern07/job_scripts/5223780'
+wandb: Appending key for api.wandb.ai to your netrc file: /user2/c-2iia/in156281/.netrc
+wandb: Currently logged in as: isen_naiken (isen_naiken-chu-dijon-bourgogne) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.21.0
+wandb: Run data is saved locally in /beegfs/data/work/c-2iia/in156281/wandb/run-20250721_225956-u0jciai5
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run youthful-armadillo-4
+wandb:  View project at https://wandb.ai/isen_naiken-chu-dijon-bourgogne/unet_gang
+wandb:  View run at https://wandb.ai/isen_naiken-chu-dijon-bourgogne/unet_gang/runs/u0jciai5
+Configuration: 
+MODEL_SAVE_PATH: output/models/unet_model.pth
+INPUT_FILENAMES: ['PET.nii.gz', 'SEG.nii.gz']
+SLICE_AXIS: 2
+BATCH_SIZE: 12
+NUM_WORKERS: 8
+LEARNING_RATE: 0.001
+VALIDATION_SPLIT: 0.3
+NUM_EPOCHS: 20
+RANDOM_SEED: 42
+DEVICE: cuda
+
+Loading NIfTI files : 0patients [00:00, ?patients/s]Loading NIfTI files : 20patients [00:00, 190.62patients/s]Loading NIfTI files : 40patients [00:00, 189.26patients/s]Loading NIfTI files : 60patients [00:00, 192.56patients/s]Loading NIfTI files : 80patients [00:00, 192.99patients/s]Loading NIfTI files : 100patients [00:00, 189.25patients/s]Loading NIfTI files : 120patients [00:00, 191.88patients/s]Loading NIfTI files : 140patients [00:00, 193.34patients/s]Loading NIfTI files : 157patients [00:00, 192.22patients/s]
+Loading NIfTI files : 0patients [00:00, ?patients/s]Loading NIfTI files : 16patients [00:00, 154.81patients/s]Loading NIfTI files : 36patients [00:00, 175.75patients/s]Loading NIfTI files : 57patients [00:00, 189.95patients/s]Loading NIfTI files : 68patients [00:00, 186.35patients/s]
+U-Net instantiated.
+Loss function: BCEWithLogitsLoss
+Optimizer: AdamW with lr=0.001

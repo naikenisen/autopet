@@ -5,8 +5,7 @@ Classes:
     UNet(nn.Module):
         Implements a standard 2D U-Net architecture.
             n_channels (int): Number of input channels.
-            n_classes (int)
-            : Number of output classes.
+            n_classes (int): Number of output classes.
         Methods:
             forward(x): Forward pass through the network.
 

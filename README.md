@@ -1,2 +1,0 @@
-# autopet
-Autopet challenge model

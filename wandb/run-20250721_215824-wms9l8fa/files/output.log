@@ -1,0 +1,26 @@
+Traceback (most recent call last):
+  File "/beegfs/data/work/c-2iia/in156281/unet_gang/training.py", line 97, in <module>
+    patients = get_patients(data_folder_path=DATASET_PATH)
+  File "/beegfs/data/work/c-2iia/in156281/unet_gang/src/utils.py", line 41, in get_patients
+    patients = [
+  File "/beegfs/data/work/c-2iia/in156281/unet_gang/src/utils.py", line 42, in <listcomp>
+    Patient.from_folder_path(os.path.join(data_folder_path, d))
+  File "/beegfs/data/work/c-2iia/in156281/unet_gang/src/dataset/data_classes.py", line 70, in from_folder_path
+    seg_data = seg_img.get_fdata()
+  File "/user2/c-2iia/in156281/.local/lib/python3.9/site-packages/nibabel/dataobj_images.py", line 374, in get_fdata
+    data = np.asanyarray(self._dataobj, dtype=dtype)
+  File "/user2/c-2iia/in156281/.local/lib/python3.9/site-packages/nibabel/arrayproxy.py", line 454, in __array__
+    arr = self._get_scaled(dtype=dtype, slicer=())
+  File "/user2/c-2iia/in156281/.local/lib/python3.9/site-packages/nibabel/arrayproxy.py", line 421, in _get_scaled
+    scaled = apply_read_scaling(self._get_unscaled(slicer=slicer), scl_slope, scl_inter)
+  File "/user2/c-2iia/in156281/.local/lib/python3.9/site-packages/nibabel/arrayproxy.py", line 391, in _get_unscaled
+    return array_from_file(
+  File "/user2/c-2iia/in156281/.local/lib/python3.9/site-packages/nibabel/volumeutils.py", line 467, in array_from_file
+    n_read = infile.readinto(data_bytes)
+  File "/soft/c7/spack/0.18.0/packages/linux-centos7-skylake_avx512/python/3.9.10/gcc/11.2.0/z22cwgnmgo4wib6imqjxif7li2wqhhvc/lib/python3.9/gzip.py", line 300, in read
+    return self._buffer.read(size)
+  File "/soft/c7/spack/0.18.0/packages/linux-centos7-skylake_avx512/python/3.9.10/gcc/11.2.0/z22cwgnmgo4wib6imqjxif7li2wqhhvc/lib/python3.9/_compression.py", line 68, in readinto
+    data = self.read(len(byte_view))
+  File "/soft/c7/spack/0.18.0/packages/linux-centos7-skylake_avx512/python/3.9.10/gcc/11.2.0/z22cwgnmgo4wib6imqjxif7li2wqhhvc/lib/python3.9/gzip.py", line 495, in read
+    uncompress = self._decompressor.decompress(buf, size)
+KeyboardInterrupt
