@@ -1,6 +1,5 @@
 #!/bin/ksh 
 #$ -q gpu
-#$ -l hostname=webern57
 #$ -o result.out
 #$ -j y
 #$ -N unet_gang
