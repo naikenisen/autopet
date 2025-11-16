@@ -31,3 +31,14 @@ mkdir -p /work/imvia/in156281/.config/wandb
 # Lancer le script d'entraînement
 python3 training.py
 ```
+Lancer un job sur le CCUB avec le script `train.sh`
+
+```bash
+qsub train.sh
+```
+Surveiller les jobs en cours d'exécution
+```bash
+qstat
+# supprimer un job
+qdel <job_id>
+```
