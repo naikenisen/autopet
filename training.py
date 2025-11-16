@@ -50,7 +50,7 @@ wandb.login(key="ab67e0f4c27fad7a0d47405f84a8a4deb80056ba")
 if __name__ == "__main__":
     try:
         # --- Configuration ---
-        DATASET_PATH = "/work/c-2iia/in156281/data_unet"
+        DATASET_PATH = "/work/imvia/in156281/data_unet"
         MODEL_SAVE_PATH = "output/models/unet_model.pth"
         INPUT_FILENAMES = ["PET.nii.gz", "SEG.nii.gz"]
         SLICE_AXIS = 2  # 0: x, 1: y, 2: z
