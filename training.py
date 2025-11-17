@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
         # Sélectionner un quart des patients au hasard
         random.seed(RANDOM_SEED)
-        patients = random.sample(patients, len(patients) // 4)
+        patients = random.sample(patients, len(patients) // 5)
 
         # --- Dataset Init ---
         train_patients, val_patients = train_test_split(
