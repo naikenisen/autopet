@@ -7,3 +7,5 @@ test.ipynb
 .ipynb_checkpoints/
 wandb/
 .vscode/
+unet_model.pth
+result.out
