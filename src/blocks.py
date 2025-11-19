@@ -1,35 +1,3 @@
-"""
-Blocks for building 2D and 3D U-Net architectures.
-
-Classes:
-    DoubleConv(nn.Module):
-        Applies two consecutive 2D convolutional layers, each followed by batch normalization and ReLU activation.
-
-    DoubleConv3D(nn.Module):
-        Applies two consecutive 3D convolutional layers, each followed by batch normalization and ReLU activation.
-
-    Down(nn.Module):
-        Downsamples input using MaxPool2d, followed by a DoubleConv block.
-
-    Down3D(nn.Module):
-        Downsamples input using MaxPool3d, followed by a DoubleConv3D block.
-
-    Up(nn.Module):
-        Upsamples input using ConvTranspose2d, concatenates with skip connection, followed by a DoubleConv block.
-        Handles cropping of skip connection to match upsampled tensor size.
-
-    Up3D(nn.Module):
-        Upsamples input using ConvTranspose3d, concatenates with skip connection, followed by a DoubleConv3D block.
-        Handles cropping and padding of skip connection to match upsampled tensor size.
-
-    OutConv(nn.Module):
-        Final 2D convolutional layer with kernel size 1, typically used for output layer.
-
-    OutConv3D(nn.Module):
-        Final 3D convolutional layer with kernel size 1, typically used for output layer.
-
-"""
-
 import torch
 import torch.nn as nn
 

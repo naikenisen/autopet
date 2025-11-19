@@ -1,39 +1,4 @@
-"""
-This module defines 2D and 3D U-Net architectures for image segmentation tasks, along with a utility function for loading model weights.
-
-Classes:
-    UNet(nn.Module):
-        Implements a standard 2D U-Net architecture.
-            n_channels (int): Number of input channels.
-            n_classes (int): Number of output classes.
-        Methods:
-            forward(x): Forward pass through the network.
-
-    UNet3D(nn.Module):
-        Implements a 3D U-Net architecture for volumetric data.
-            n_channels (int): Number of input channels.
-            n_classes (int): Number of output classes.
-            feature_scale_factor (int, optional): Scales the number of feature channels. Default is 1.
-        Methods:
-            forward(x): Forward pass through the network.
-
-Functions:
-    load_model(
-        model_path: str,
-        ModelClass: type,
-        device: torch.device,
-        **model_init_kwargs
-    ) -> nn.Module:
-        Loads a PyTorch model from a saved state_dict file.
-            model_path (str): Path to the model's state_dict file (.pth or .pt).
-            ModelClass (type): The model class to instantiate (e.g., UNet or UNet3D).
-            device (torch.device): Device to load the model onto ('cpu' or 'cuda').
-            **model_init_kwargs: Additional keyword arguments for model initialization.
-        Returns:
-            nn.Module: The loaded model in evaluation mode, or None if loading fails.
-"""
-
-from src.model.blocks import (
+from src.blocks import (
     DoubleConv,
     DoubleConv3D,
     Down,
@@ -45,7 +10,6 @@ from src.model.blocks import (
 )
 import torch
 import torch.nn as nn
-
 
 class UNet(nn.Module):
     def __init__(self, n_channels, n_classes):
