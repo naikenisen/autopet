@@ -106,23 +106,12 @@ val_loader = DataLoader(
     pin_memory=True if DEVICE.type == "cuda" else False,
 )
 
-# --- Model Init ---
-model = UNet(
-    n_channels=len(INPUT_FILENAMES), n_classes=NUM_OUTPUT_CHANNELS_MODEL
-).to(DEVICE)
-print(f"U-Net instantiated.")
-
-# --- Loss Function Init ---
+model = UNet(n_channels=len(INPUT_FILENAMES), n_classes=NUM_OUTPUT_CHANNELS_MODEL).to(DEVICE)
 criterion = nn.BCEWithLogitsLoss()
-print(f"Loss function: BCEWithLogitsLoss")
-
-# --- Optimizer Init ---
 optimizer = optim.AdamW(
     model.parameters(), lr=LEARNING_RATE, weight_decay=0.01
 )
-print(f"Optimizer: AdamW with lr={LEARNING_RATE}")
 
-# --- Training Loop ---
 train_losses_history = []
 val_losses_history = []
 val_dice_scores_history = []
@@ -136,12 +125,10 @@ for epoch in range(1, NUM_EPOCHS + 1):
         model, val_loader, criterion, DEVICE
     )
     print(f"Epoch {epoch}/{NUM_EPOCHS} - Val Loss: {val_loss:.4f}, Val Dice: {val_dice:.4f}")
-    # Store metrics
+
     train_losses_history.append(train_loss)
     val_losses_history.append(val_loss)
     val_dice_scores_history.append(val_dice)
-
-    # --- WandB log ---
     wandb.log({
         "epoch": epoch,
         "train_loss": train_loss,

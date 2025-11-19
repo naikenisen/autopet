@@ -11,7 +11,6 @@ from sklearn.model_selection import train_test_split
 import random
 
 def normalise_slice(image_slice: np.ndarray) -> np.ndarray:
-    """Normalize a 2D slice to the range [0, 1]."""
     min_val = np.min(image_slice)
     max_val = np.max(image_slice)
 
@@ -20,19 +19,6 @@ def normalise_slice(image_slice: np.ndarray) -> np.ndarray:
         if max_val - min_val > 1e-6
         else image_slice
     )
-
-
-def normalise_volume(volume_patch: np.ndarray) -> np.ndarray:
-    """Normalizes a 3D patch to the range [0, 1]."""
-    patch = volume_patch.astype(np.float32)
-    min_val, max_val = np.min(patch), np.max(patch)
-
-    if max_val - min_val > 1e-6:
-        return (patch - min_val) / (max_val - min_val)
-    else:
-        return patch
-
-
 
 @dataclass
 class Patient:
