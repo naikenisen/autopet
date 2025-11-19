@@ -1,0 +1,12 @@
+
+DATASET_PATH = "/work/imvia/in156281/data_unet"
+MODEL_SAVE_PATH = "output/models/unet_model.pth"
+INPUT_FILENAMES = ["PET.nii.gz", "SEG.nii.gz"]
+SLICE_AXIS = 2  # 0: x, 1: y, 2: z
+BATCH_SIZE = 20
+NUM_WORKERS = 8
+LEARNING_RATE = 1e-4
+VALIDATION_SPLIT = 0.3
+NUM_EPOCHS = 20
+RANDOM_SEED = 42
+NUM_OUTPUT_CHANNELS_MODEL = 1

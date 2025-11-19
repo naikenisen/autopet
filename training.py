@@ -8,6 +8,8 @@ from sklearn.model_selection import train_test_split
 from src.data_loader import NiftDataset, get_patients
 from src.model import UNet
 import wandb
+from src.config import *
+
 wandb.login(key="ab67e0f4c27fad7a0d47405f84a8a4deb80056ba")
 
 def dice_coefficient(
@@ -95,18 +97,10 @@ def test_epoch(model, loader, device):
     print(f"Test - Avg Dice: {avg_test_dice:.4f}")
     return avg_test_dice
 
-DATASET_PATH = "/work/imvia/in156281/data_unet"
-MODEL_SAVE_PATH = "output/models/unet_model.pth"
-INPUT_FILENAMES = ["PET.nii.gz", "SEG.nii.gz"]
-SLICE_AXIS = 2  # 0: x, 1: y, 2: z
-BATCH_SIZE = 20
-NUM_WORKERS = 8
-LEARNING_RATE = 1e-4
-VALIDATION_SPLIT = 0.3
-NUM_EPOCHS = 20
-RANDOM_SEED = 42
+
+
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-NUM_OUTPUT_CHANNELS_MODEL = 1  # Do not change unless we want to detect more labels in the future
+
 os.makedirs(os.path.dirname(MODEL_SAVE_PATH), exist_ok=True)
 
 # --- WandB Init ---

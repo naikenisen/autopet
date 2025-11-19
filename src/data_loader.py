@@ -5,6 +5,7 @@ from torch.utils.data import Dataset
 from typing import List, Tuple, Optional
 from tqdm import tqdm
 from dataclasses import dataclass
+import os
 
 def normalise_slice(image_slice: np.ndarray) -> np.ndarray:
     """Normalize a 2D slice to the range [0, 1]."""
