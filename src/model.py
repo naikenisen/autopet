@@ -1,12 +1,8 @@
 from src.blocks import (
     DoubleConv,
-    DoubleConv3D,
     Down,
-    Down3D,
     Up,
-    Up3D,
     OutConv,
-    OutConv3D,
 )
 import torch
 import torch.nn as nn
@@ -51,42 +47,3 @@ class UNet(nn.Module):
         # output
         out = self.outc(d4)
         return out
-
-
-class UNet3D(nn.Module):
-    def __init__(self, n_channels, n_classes, feature_scale_factor=1):
-        super().__init__()
-        self.n_channels_in = n_channels
-        self.n_classes_out = n_classes
-
-        # Standard U-Net feature progression, can be scaled
-        f = [int(s * feature_scale_factor) for s in [64, 128, 256, 512]]
-
-        # encoder
-        self.inc = DoubleConv3D(n_channels, f[0])
-        self.down1 = Down3D(f[0], f[1])
-        self.down2 = Down3D(f[1], f[2])
-        self.down3 = Down3D(f[2], f[3])
-
-        # decoder
-        self.up1 = Up3D(f[3], f[2])
-        self.up2 = Up3D(f[2], f[1])
-        self.up3 = Up3D(f[1], f[0])
-
-        # output
-        self.outc = OutConv3D(f[0], n_classes)
-
-    def forward(self, x):
-        # encoder
-        x1 = self.inc(x)
-        x2 = self.down1(x1)
-        x3 = self.down2(x2)
-        x4_bottleneck = self.down3(x3)
-
-        # decoder
-        d = self.up1(x4_bottleneck, x3)
-        d = self.up2(d, x2)
-        d = self.up3(d, x1)
-
-        logits = self.outc(d)
-        return logits
