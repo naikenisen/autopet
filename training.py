@@ -1,23 +1,34 @@
 import os
-import random
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from sklearn.model_selection import train_test_split
-from src.data_loader import NiftDataset, get_patients
 from src.model import UNet
 import wandb
 from src.config import *
+from src.data_loader import train_dataset, val_dataset
 
 wandb.login(key="ab67e0f4c27fad7a0d47405f84a8a4deb80056ba")
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+os.makedirs(os.path.dirname(MODEL_SAVE_PATH), exist_ok=True)
 
-def dice_coefficient(
-    preds: torch.Tensor, targets: torch.Tensor, epsilon: float = 1e-6
-) -> torch.Tensor:
-    """
-    Calculates the Dice coefficient for binary segmentation.
-    """
+wandb.init(
+    project="unet_gang",
+    config={
+        "model_save_path": MODEL_SAVE_PATH,
+        "input_filenames": INPUT_FILENAMES,
+        "slice_axis": SLICE_AXIS,
+        "batch_size": BATCH_SIZE,
+        "num_workers": NUM_WORKERS,
+        "learning_rate": LEARNING_RATE,
+        "validation_split": VALIDATION_SPLIT,
+        "num_epochs": NUM_EPOCHS,
+        "random_seed": RANDOM_SEED,
+        "device": str(DEVICE),
+    }
+)
+
+def dice_coefficient(preds, targets, epsilon = 1e-6):
     preds = (preds > 0.5).float()
     targets = targets.float()
     preds_flat = preds.contiguous().view(preds.shape[0], -1)
@@ -79,68 +90,6 @@ def validate_epoch(model, loader, criterion, device):
     print(f"Validation - Avg Loss: {avg_val_loss:.4f}, Avg Dice: {avg_val_dice:.4f}")
     return avg_val_loss, avg_val_dice
 
-
-def test_epoch(model, loader, device):
-    model.eval()
-    running_dice = 0.0
-    num_batches = len(loader)
-
-    with torch.no_grad():
-        for inputs, targets in loader:
-            inputs, targets = inputs.to(device), targets.to(device)
-            outputs_logits = model(inputs)
-            outputs_probs = torch.sigmoid(outputs_logits)
-            dice = dice_coefficient(outputs_probs, targets)
-            running_dice += dice.item()
-
-    avg_test_dice = running_dice / num_batches
-    print(f"Test - Avg Dice: {avg_test_dice:.4f}")
-    return avg_test_dice
-
-
-
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-os.makedirs(os.path.dirname(MODEL_SAVE_PATH), exist_ok=True)
-
-# --- WandB Init ---
-wandb.init(
-    project="unet_gang",
-    config={
-        "model_save_path": MODEL_SAVE_PATH,
-        "input_filenames": INPUT_FILENAMES,
-        "slice_axis": SLICE_AXIS,
-        "batch_size": BATCH_SIZE,
-        "num_workers": NUM_WORKERS,
-        "learning_rate": LEARNING_RATE,
-        "validation_split": VALIDATION_SPLIT,
-        "num_epochs": NUM_EPOCHS,
-        "random_seed": RANDOM_SEED,
-        "device": str(DEVICE),
-    }
-)
-
-# --- Load Patients ---
-patients = get_patients(data_folder_path=DATASET_PATH)
-
-# Sélectionner un quart des patients au hasard
-random.seed(RANDOM_SEED)
-patients = random.sample(patients, len(patients) // 5)
-
-# --- Dataset Init ---
-train_patients, val_patients = train_test_split(
-    patients, test_size=VALIDATION_SPLIT, random_state=RANDOM_SEED
-)
-train_dataset = NiftDataset(
-    patients=train_patients,
-    filenames=INPUT_FILENAMES,
-    slice_axis=SLICE_AXIS,
-)
-val_dataset = NiftDataset(
-    patients=val_patients,
-    filenames=INPUT_FILENAMES,
-    slice_axis=SLICE_AXIS,
-)
 
 train_loader = DataLoader(
     dataset=train_dataset,

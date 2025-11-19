@@ -6,6 +6,9 @@ from typing import List, Tuple, Optional
 from tqdm import tqdm
 from dataclasses import dataclass
 import os
+from src.config import *
+from sklearn.model_selection import train_test_split
+import random
 
 def normalise_slice(image_slice: np.ndarray) -> np.ndarray:
     """Normalize a 2D slice to the range [0, 1]."""
@@ -222,3 +225,26 @@ class NiftDataset(Dataset):
             return torch.zeros(
                 (len(self.input_filenames_keys), dummy_h, dummy_w), dtype=torch.float32
             ), torch.zeros((1, dummy_h, dummy_w), dtype=torch.float32)
+        
+
+# --- Load Patients ---
+patients = get_patients(data_folder_path=DATASET_PATH)
+
+# Sélectionner un quart des patients au hasard
+random.seed(RANDOM_SEED)
+patients = random.sample(patients, len(patients) // 5)
+
+# --- Dataset Init ---
+train_patients, val_patients = train_test_split(
+    patients, test_size=VALIDATION_SPLIT, random_state=RANDOM_SEED
+)
+train_dataset = NiftDataset(
+    patients=train_patients,
+    filenames=INPUT_FILENAMES,
+    slice_axis=SLICE_AXIS,
+)
+val_dataset = NiftDataset(
+    patients=val_patients,
+    filenames=INPUT_FILENAMES,
+    slice_axis=SLICE_AXIS,
+)
