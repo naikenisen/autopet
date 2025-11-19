@@ -10,16 +10,6 @@ from src.config import *
 from sklearn.model_selection import train_test_split
 import random
 
-def normalise_slice(image_slice: np.ndarray) -> np.ndarray:
-    min_val = np.min(image_slice)
-    max_val = np.max(image_slice)
-
-    return (
-        (image_slice - min_val) / (max_val - min_val)
-        if max_val - min_val > 1e-6
-        else image_slice
-    )
-
 @dataclass
 class Patient:
     """Class for keeping track of a patient."""
@@ -32,30 +22,24 @@ class Patient:
     seg_filepath: str
     has_segmentation: Optional[bool] = None
 
-    def get_input_filepath(self, filename_key: str) -> str:
+    def get_input_filepath(self, filename_key):
         """Helper to get specific input modality filepath based on a key."""
         key = filename_key.upper()
-        if key == "PET.NII.GZ" or key == "PET.NII":
+        if key in ("PET.NII.GZ", "PET.NII"):
             return self.pet_filepath
-        elif key == "CT.NII.GZ" or key == "CT.NII":
+        elif key in ("CT.NII.GZ", "CT.NII"):
             return self.ct_filepath
-        elif key == "CTRES.NII.GZ" or key == "CTRES.NII":
+        elif key in ("CTRES.NII.GZ", "CTRES.NII"):
             return self.ctres_filepath
-        elif key == "SEG.NII.GZ" or key == "SEG.NII":
+        elif key in ("SEG.NII.GZ", "SEG.NII"):
             return self.seg_filepath
-        elif key == "SUV.NII.GZ" or key == "SUV.NII":
+        elif key in ("SUV.NII.GZ", "SUV.NII"):
             return self.suv_filepath
         else:
             raise ValueError(f"Unknown input filename key: {filename_key}")
 
     @staticmethod
-    def from_folder_path(folder_path: str) -> "Patient":
-        """
-        Create a Patient object from a folder_path.
-
-        Args:
-            folder_path (str): folder_path containing the subject data.
-        """
+    def from_folder_path(folder_path):
         # find the files in the folder_path recursively (they can be in subfolders)
         files = []
         for root, dirs, filenames in os.walk(folder_path):
@@ -69,55 +53,14 @@ class Patient:
         suv_filepath = [f for f in files if "SEG.nii.gz" or "SEG.nii" in f][0]
         seg_filepath = [f for f in files if "SEG.nii.gz" or "SEG.nii" in f][0]
 
-        # check if the files exist
-        if not os.path.exists(ctres_filepath):
-            raise FileNotFoundError(f"File {ctres_filepath} does not exist")
-        if not os.path.exists(ct_filepath):
-            raise FileNotFoundError(f"File {ct_filepath} does not exist")
-        if not os.path.exists(pet_filepath):
-            raise FileNotFoundError(f"File {pet_filepath} does not exist")
-        if not os.path.exists(suv_filepath):
-            raise FileNotFoundError(f"File {suv_filepath} does not exist")
-        if not os.path.exists(seg_filepath):
-            raise FileNotFoundError(f"File {seg_filepath} does not exist")
-
-        # check if the segmentation file has non zero values
-        seg_img = nib.load(seg_filepath)
-        seg_data = seg_img.get_fdata()
-        has_segmentation = True if seg_data.any() else False
-
         return Patient(
             id=os.path.basename(folder_path),
             ctres_filepath=ctres_filepath,
             ct_filepath=ct_filepath,
             pet_filepath=pet_filepath,
             suv_filepath=suv_filepath,
-            seg_filepath=seg_filepath,
-            has_segmentation=has_segmentation,
+            seg_filepath=seg_filepath
         )
-
-
-def get_patients(data_folder_path: str = "data/") -> list:
-    """
-    Get a list of patient directories from the given data folder path.
-    Args:
-        data_folder_path (str): Path to the folder containing patient directories.
-    Returns:
-        list: List of patient directory names.
-    """
-    try:
-        patients = [
-            Patient.from_folder_path(os.path.join(data_folder_path, d))
-            for d in os.listdir(data_folder_path)
-            if os.path.isdir(os.path.join(data_folder_path, d))
-        ]
-        return patients
-    except FileNotFoundError:
-        print(
-            f"Error: Directory not found at {data_folder_path}. Please ensure the path is correct."
-        )
-        return []
-
 
 class NiftDataset(Dataset):
     def __init__(
@@ -169,58 +112,45 @@ class NiftDataset(Dataset):
         current_patient: Patient = self.patients[list_idx]
 
         input_slices = []
-        try:
-            for key in self.filename_keys:
-                file_path = current_patient.get_input_filepath(key)
-                volume = nib.load(file_path).get_fdata()
-                img_slice = np.take(volume, indices=slice_index, axis=self.slice_axis)
-                img_slice_normalized = normalise_slice(img_slice)
-                input_slices.append(img_slice_normalized)
+        for key in self.filename_keys:
+            file_path = current_patient.get_input_filepath(key)
+            volume = nib.load(file_path).get_fdata()
+            img_slice = np.take(volume, indices=slice_index, axis=self.slice_axis)
+            if np.max(img_slice) - np.min(img_slice) > 1e-6 :
+                img_slice_normalized = (img_slice - np.min(img_slice)) / (np.max(img_slice) - np.min(img_slice))
+            else:
+                img_slice_normalized = img_slice
+            input_slices.append(img_slice_normalized)
 
-            input_array = np.stack(input_slices, axis=0)
+        input_array = np.stack(input_slices, axis=0)
 
-            # Load target segmentation slice from the Patient object
-            target_volume = nib.load(current_patient.seg_filepath).get_fdata()
-            target_slice = np.take(
-                target_volume, indices=slice_index, axis=self.slice_axis
-            )
+        # Load target segmentation slice from the Patient object
+        target_volume = nib.load(current_patient.seg_filepath).get_fdata()
+        target_slice = np.take(
+            target_volume, indices=slice_index, axis=self.slice_axis
+        )
 
-            # Binary mask for the target
-            binary_target_array = (target_slice == self.lesion_label).astype(np.float32)
-            binary_target_array = np.expand_dims(
-                binary_target_array, axis=0
-            )  # add channel dimension: (H, W) -> (1, H, W)
+        # Binary mask for the target
+        binary_target_array = (target_slice == self.lesion_label).astype(np.float32)
+        binary_target_array = np.expand_dims(
+            binary_target_array, axis=0
+        )  # add channel dimension: (H, W) -> (1, H, W)
 
-            input_tensor = torch.from_numpy(input_array).float()
-            target_tensor = torch.from_numpy(binary_target_array).float()
+        input_tensor = torch.from_numpy(input_array).float()
+        target_tensor = torch.from_numpy(binary_target_array).float()
 
-            return input_tensor, target_tensor
-        except FileNotFoundError as e:
-            print(
-                f"FATAL Error (FileNotFound) for global_slice_idx {global_slice_idx} (Patient ID: {current_patient.id}, slice_in_patient: {slice_index}): {e}"
-            )
-            dummy_h, dummy_w = 256, 256
-            return torch.zeros(
-                (len(self.input_filenames_keys), dummy_h, dummy_w), dtype=torch.float32
-            ), torch.zeros((1, dummy_h, dummy_w), dtype=torch.float32)
-        except Exception as e:
-            print(
-                f"FATAL Error during __getitem__ for global_slice_idx {global_slice_idx} (Patient ID: {current_patient.id}, slice_in_patient: {slice_index}): {e}"
-            )
-            dummy_h, dummy_w = 256, 256
-            return torch.zeros(
-                (len(self.input_filenames_keys), dummy_h, dummy_w), dtype=torch.float32
-            ), torch.zeros((1, dummy_h, dummy_w), dtype=torch.float32)
-        
+        return input_tensor, target_tensor
 
-# --- Load Patients ---
-patients = get_patients(data_folder_path=DATASET_PATH)
+patients = [
+    Patient.from_folder_path(os.path.join(DATASET_PATH, d))
+    for d in os.listdir(DATASET_PATH)
+    if os.path.isdir(os.path.join(DATASET_PATH, d))
+]
 
 # Sélectionner un quart des patients au hasard
 random.seed(RANDOM_SEED)
 patients = random.sample(patients, len(patients) // 5)
 
-# --- Dataset Init ---
 train_patients, val_patients = train_test_split(
     patients, test_size=VALIDATION_SPLIT, random_state=RANDOM_SEED
 )
