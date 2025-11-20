@@ -7,6 +7,7 @@ import os
 from src.config import *
 from sklearn.model_selection import train_test_split
 import random
+from scipy.ndimage import zoom
 
 class NiftDataset(Dataset):
     def __init__(self, pet_paths, ct_paths, label_paths, slice_axis=2):
@@ -36,15 +37,31 @@ class NiftDataset(Dataset):
         # Load PET volume and extract slice (channel 0)
         pet_volume = nib.load(self.pet_paths[file_idx]).get_fdata()
         pet_slice = np.take(pet_volume, indices=slice_idx, axis=self.slice_axis)
+        
+        # Load CT volume and extract slice (channel 1)
+        ct_volume = nib.load(self.ct_paths[file_idx]).get_fdata()
+        ct_slice = np.take(ct_volume, indices=slice_idx, axis=self.slice_axis)
+        
+        # Load target segmentation slice
+        label_volume = nib.load(self.label_paths[file_idx]).get_fdata()
+        label_slice = np.take(label_volume, indices=slice_idx, axis=self.slice_axis)
+        
+        # Resize CT and PET to match label dimensions if needed
+        target_shape = label_slice.shape
+        if pet_slice.shape != target_shape:
+            zoom_factors = np.array(target_shape) / np.array(pet_slice.shape)
+            pet_slice = zoom(pet_slice, zoom_factors, order=1)
+        
+        if ct_slice.shape != target_shape:
+            zoom_factors = np.array(target_shape) / np.array(ct_slice.shape)
+            ct_slice = zoom(ct_slice, zoom_factors, order=1)
+        
         # Normalize PET slice
         if np.max(pet_slice) - np.min(pet_slice) > 1e-6:
             pet_slice_normalized = (pet_slice - np.min(pet_slice)) / (np.max(pet_slice) - np.min(pet_slice))
         else:
             pet_slice_normalized = pet_slice
         
-        # Load CT volume and extract slice (channel 1)
-        ct_volume = nib.load(self.ct_paths[file_idx]).get_fdata()
-        ct_slice = np.take(ct_volume, indices=slice_idx, axis=self.slice_axis)
         # Normalize CT slice
         if np.max(ct_slice) - np.min(ct_slice) > 1e-6:
             ct_slice_normalized = (ct_slice - np.min(ct_slice)) / (np.max(ct_slice) - np.min(ct_slice))
@@ -54,9 +71,6 @@ class NiftDataset(Dataset):
         # Stack PET and CT as 2 channels: (2, H, W)
         input_array = np.stack([pet_slice_normalized, ct_slice_normalized], axis=0)
         
-        # Load target segmentation slice
-        label_volume = nib.load(self.label_paths[file_idx]).get_fdata()
-        label_slice = np.take(label_volume, indices=slice_idx, axis=self.slice_axis)
         # Binary mask for the target
         binary_target_array = (label_slice == self.lesion_label).astype(np.float32)
         binary_target_array = np.expand_dims(binary_target_array, axis=0)
