@@ -2,149 +2,117 @@ import nibabel as nib
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 from tqdm import tqdm
-from dataclasses import dataclass
 import os
 from src.config import *
 from sklearn.model_selection import train_test_split
 import random
 
-@dataclass
-class Patient:
-    """Class for keeping track of a patient."""
-
-    id: str
-    pet_filepath: str
-    seg_filepath: str
-
-    def get_input_filepath(self, filename_key):
-        """Helper to get specific input modality filepath based on a key."""
-        key = filename_key.upper()
-        if key in ("PET.NII.GZ", "PET.NII"):
-            return self.pet_filepath
-        elif key in ("SEG.NII.GZ", "SEG.NII"):
-            return self.seg_filepath
-        else:
-            raise ValueError(f"Unknown input filename key: {filename_key}")
-
-    @staticmethod
-    def from_folder_path(folder_path):
-        # find the files in the folder_path recursively (they can be in subfolders)
-        files = []
-        for root, dirs, filenames in os.walk(folder_path):
-            for filename in filenames:
-                files.append(os.path.join(root, filename))
-
-        # filter the files to find the ones we need
-        pet_filepath = [f for f in files if "PET.nii.gz" in f or "PET.nii" in f][0]
-        seg_filepath = [f for f in files if "SEG.nii.gz" in f or "SEG.nii" in f][0]
-
-        return Patient(
-            id=os.path.basename(folder_path),
-            pet_filepath=pet_filepath,
-            seg_filepath=seg_filepath
-        )
-
 class NiftDataset(Dataset):
     def __init__(
         self,
-        patients: List[Patient],
-        filenames: List[str],
-        slice_axis=2,  # 0: x, 1: y, 2: z axis to slice the images in the files with.
+        image_paths: List[str],
+        label_paths: List[str],
+        slice_axis=2,  # 0: x, 1: y, 2: z axis to slice the images
         verbose=False,
     ):
         super().__init__()
 
-        self.patients = patients
-        self.filename_keys = [key.strip() for key in filenames]
+        self.image_paths = image_paths
+        self.label_paths = label_paths
         self.slice_axis = int(slice_axis)
         self.verbose = verbose
         self.lesion_label = 1
-        self.slice_map: List[Tuple[str, str]] = []
+        self.slice_map: List[Tuple[int, int]] = []  # (file_idx, slice_idx)
 
-        skipped_dirs = 0
-        for patient_idx, patient_obj in tqdm(
-            enumerate(self.patients), desc="Loading NIfTI files ", unit="patients"
+        skipped_files = 0
+        for file_idx, (img_path, label_path) in tqdm(
+            enumerate(zip(self.image_paths, self.label_paths)), 
+            desc="Loading NIfTI files", 
+            unit="files",
+            total=len(self.image_paths)
         ):
             try:
-                seg_filepath = patient_obj.seg_filepath
-                img_header = nib.load(seg_filepath).header
+                img_header = nib.load(label_path).header
                 n_slices = img_header.get_data_shape()[self.slice_axis]
-                for slice_idx_in_patient in range(n_slices):
-                    self.slice_map.append((patient_idx, slice_idx_in_patient))
+                for slice_idx in range(n_slices):
+                    self.slice_map.append((file_idx, slice_idx))
             except Exception as e:
                 if self.verbose:
-                    print(
-                        f"Error loading header for patient {patient_obj.id} (SEG: {seg_filepath}): {e}. Skipping."
-                    )
-                skipped_dirs += 1
+                    print(f"Error loading {label_path}: {e}. Skipping.")
+                skipped_files += 1
 
         self.total_slices = len(self.slice_map)
         if self.verbose:
-            print(f"Total slices across all patients: {self.total_slices}")
-            if skipped_dirs > 0:
-                print(f"Skipped {skipped_dirs} directories.")
+            print(f"Total slices across all files: {self.total_slices}")
+            if skipped_files > 0:
+                print(f"Skipped {skipped_files} files.")
 
     def __len__(self) -> int:
-        """Returns the total number of slices across all patients."""
+        """Returns the total number of slices across all files."""
         return self.total_slices
 
-    def __getitem__(self, global_slice_idx: int) -> Tuple[torch.tensor, torch.Tensor]:
+    def __getitem__(self, global_slice_idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         """Returns the input and target tensors for a given slice index."""
-        list_idx, slice_index = self.slice_map[global_slice_idx]
-        current_patient: Patient = self.patients[list_idx]
+        file_idx, slice_idx = self.slice_map[global_slice_idx]
+        
+        # Load image volume and extract slice
+        image_volume = nib.load(self.image_paths[file_idx]).get_fdata()
+        img_slice = np.take(image_volume, indices=slice_idx, axis=self.slice_axis)
+        
+        # Normalize image slice
+        if np.max(img_slice) - np.min(img_slice) > 1e-6:
+            img_slice_normalized = (img_slice - np.min(img_slice)) / (np.max(img_slice) - np.min(img_slice))
+        else:
+            img_slice_normalized = img_slice
+        
+        # Add channel dimension: (H, W) -> (1, H, W)
+        input_array = np.expand_dims(img_slice_normalized, axis=0)
 
-        input_slices = []
-        for key in self.filename_keys:
-            file_path = current_patient.get_input_filepath(key)
-            volume = nib.load(file_path).get_fdata()
-            img_slice = np.take(volume, indices=slice_index, axis=self.slice_axis)
-            if np.max(img_slice) - np.min(img_slice) > 1e-6 :
-                img_slice_normalized = (img_slice - np.min(img_slice)) / (np.max(img_slice) - np.min(img_slice))
-            else:
-                img_slice_normalized = img_slice
-            input_slices.append(img_slice_normalized)
-
-        input_array = np.stack(input_slices, axis=0)
-
-        # Load target segmentation slice from the Patient object
-        target_volume = nib.load(current_patient.seg_filepath).get_fdata()
-        target_slice = np.take(
-            target_volume, indices=slice_index, axis=self.slice_axis
-        )
+        # Load target segmentation slice
+        label_volume = nib.load(self.label_paths[file_idx]).get_fdata()
+        label_slice = np.take(label_volume, indices=slice_idx, axis=self.slice_axis)
 
         # Binary mask for the target
-        binary_target_array = (target_slice == self.lesion_label).astype(np.float32)
-        binary_target_array = np.expand_dims(
-            binary_target_array, axis=0
-        )  # add channel dimension: (H, W) -> (1, H, W)
+        binary_target_array = (label_slice == self.lesion_label).astype(np.float32)
+        binary_target_array = np.expand_dims(binary_target_array, axis=0)
 
         input_tensor = torch.from_numpy(input_array).float()
         target_tensor = torch.from_numpy(binary_target_array).float()
 
         return input_tensor, target_tensor
 
-patients = [
-    Patient.from_folder_path(os.path.join(DATASET_PATH, d))
-    for d in os.listdir(DATASET_PATH)
-    if os.path.isdir(os.path.join(DATASET_PATH, d))
-]
 
-# Sélectionner un quart des patients au hasard
+# Get all image and label file paths
+images_dir = os.path.join(DATASET_PATH, "images")
+labels_dir = os.path.join(DATASET_PATH, "labels")
+
+# Get all image files
+image_files = sorted([f for f in os.listdir(images_dir) if f.endswith(('.nii', '.nii.gz'))])
+
+# Create corresponding paths
+image_paths = [os.path.join(images_dir, f) for f in image_files]
+label_paths = [os.path.join(labels_dir, f) for f in image_files]
+
+# Subsample 1/5 of the data
 random.seed(RANDOM_SEED)
-patients = random.sample(patients, len(patients) // 5)
+indices = random.sample(range(len(image_paths)), len(image_paths) // 5)
+image_paths = [image_paths[i] for i in indices]
+label_paths = [label_paths[i] for i in indices]
 
-train_patients, val_patients = train_test_split(
-    patients, test_size=VALIDATION_SPLIT, random_state=RANDOM_SEED
+# Split into train and validation
+train_img, val_img, train_lbl, val_lbl = train_test_split(
+    image_paths, label_paths, test_size=VALIDATION_SPLIT, random_state=RANDOM_SEED
 )
+
 train_dataset = NiftDataset(
-    patients=train_patients,
-    filenames=INPUT_FILENAMES,
+    image_paths=train_img,
+    label_paths=train_lbl,
     slice_axis=SLICE_AXIS,
 )
 val_dataset = NiftDataset(
-    patients=val_patients,
-    filenames=INPUT_FILENAMES,
+    image_paths=val_img,
+    label_paths=val_lbl,
     slice_axis=SLICE_AXIS,
 )
