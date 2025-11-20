@@ -1,7 +1,7 @@
 
 IMAGE_PATH =  "/work/imvia/in156281/data_unet/images"
 LABEL_PATH =  "/work/imvia/in156281/data_unet/labels"
-MODEL_SAVE_PATH = "output/models/unet_model.pth"
+MODEL_SAVE_PATH = "/work/imvia/in156281/autopet/models/unet_model.pth"
 SLICE_AXIS = 2  # 0: x, 1: y, 2: z
 BATCH_SIZE = 20
 NUM_WORKERS = 8
