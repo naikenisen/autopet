@@ -71,9 +71,9 @@ pet_paths = [os.path.join(PET_IMAGE_PATH, f) for f in image_files]
 ct_paths = [os.path.join(CT_IMAGE_PATH, f) for f in image_files]
 label_paths = [os.path.join(LABEL_PATH, f) for f in image_files]
 
-# Subsample 1/10 of the data
+# Subsample 1/15 of the data
 random.seed(RANDOM_SEED)
-indices = random.sample(range(len(pet_paths)), len(pet_paths) // 10)
+indices = random.sample(range(len(pet_paths)), len(pet_paths) // 15)
 pet_paths = [pet_paths[i] for i in indices]
 ct_paths = [ct_paths[i] for i in indices]
 label_paths = [label_paths[i] for i in indices]

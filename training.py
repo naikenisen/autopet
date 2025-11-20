@@ -40,6 +40,29 @@ def dice_coefficient(preds, targets, epsilon = 1e-6):
     dice = (2.0 * intersection + epsilon) / (union + epsilon)
     return dice.mean()
 
+def dice_loss(preds, targets, epsilon=1e-6):
+    """Dice loss for training (uses soft predictions)"""
+    preds = torch.sigmoid(preds)  # Convert logits to probabilities
+    preds_flat = preds.contiguous().view(preds.shape[0], -1)
+    targets_flat = targets.contiguous().view(targets.shape[0], -1)
+    intersection = (preds_flat * targets_flat).sum(dim=1)
+    union = preds_flat.sum(dim=1) + targets_flat.sum(dim=1)
+    dice = (2.0 * intersection + epsilon) / (union + epsilon)
+    return 1.0 - dice.mean()  # Return loss (1 - dice)
+
+class CombinedLoss(nn.Module):
+    """Combined BCE and Dice loss with weighting"""
+    def __init__(self, pos_weight=None, bce_weight=0.5, dice_weight=0.5):
+        super().__init__()
+        self.bce_weight = bce_weight
+        self.dice_weight = dice_weight
+        self.bce_loss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    
+    def forward(self, preds, targets):
+        bce = self.bce_loss(preds, targets)
+        dice = dice_loss(preds, targets)
+        return self.bce_weight * bce + self.dice_weight * dice
+
 
 def train_epoch(
     model, loader, optimizer, criterion, device, epoch_num, num_epochs
@@ -56,13 +79,24 @@ def train_epoch(
         loss.backward()
         optimizer.step()
         running_loss += loss.item()
+        
+        # Calculate metrics for monitoring
+        with torch.no_grad():
+            outputs_probs = torch.sigmoid(outputs_logits)
+            mean_pred = outputs_probs.mean().item()
+            mean_target = targets.mean().item()
+            max_pred = outputs_probs.max().item()
+            
         wandb.log({
-        "batch_loss": loss.item(),
-        "epoch_num": epoch_num,
-        "num_epochs": num_epochs
+            "batch_loss": loss.item(),
+            "epoch_num": epoch_num,
+            "num_epochs": num_epochs,
+            "mean_prediction": mean_pred,
+            "mean_target": mean_target,
+            "max_prediction": max_pred
         })
         print(
-            f"Epoch {epoch_num}/{num_epochs} - Training Batch {batch_idx+1}/{num_batches} - Loss: {loss.item():.4f}"
+            f"Epoch {epoch_num}/{num_epochs} - Training Batch {batch_idx+1}/{num_batches} - Loss: {loss.item():.4f} - MeanPred: {mean_pred:.4f} - MeanTarget: {mean_target:.4f}"
         )
     avg_epoch_loss = running_loss / num_batches
     print(
@@ -109,7 +143,27 @@ val_loader = DataLoader(
 )
 
 model = UNet(n_channels=2, n_classes=1).to(DEVICE)
-criterion = nn.BCEWithLogitsLoss()
+
+# Calculate positive weight to handle class imbalance
+# This will be computed from the training data
+print("Calculating class weights from training data...")
+total_pixels = 0
+positive_pixels = 0
+sample_batches = min(50, len(train_loader))  # Sample first 50 batches
+for i, (_, targets) in enumerate(train_loader):
+    if i >= sample_batches:
+        break
+    total_pixels += targets.numel()
+    positive_pixels += targets.sum().item()
+
+pos_ratio = positive_pixels / total_pixels
+neg_ratio = 1.0 - pos_ratio
+pos_weight = torch.tensor([neg_ratio / pos_ratio]).to(DEVICE)
+print(f"Class distribution: {pos_ratio*100:.4f}% positive pixels")
+print(f"Using pos_weight: {pos_weight.item():.2f}")
+
+# Use combined loss
+criterion = CombinedLoss(pos_weight=pos_weight, bce_weight=0.5, dice_weight=0.5)
 optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=0.01)
 
 train_losses_history = []
