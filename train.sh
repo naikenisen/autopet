@@ -2,7 +2,7 @@
 #$ -q gpu
 #$ -o result.out
 #$ -j y
-#$ -N autopet_train_1
+#$ -N autopet_train_2
 cd $WORKDIR
 source /beegfs/data/work/imvia/in156281/venv/bin/activate
 module load python
