@@ -3,7 +3,6 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 from typing import List, Tuple
-from tqdm import tqdm
 import os
 from src.config import *
 from sklearn.model_selection import train_test_split
@@ -18,12 +17,7 @@ class NiftDataset(Dataset):
         self.lesion_label = 1
         self.slice_map = []
         
-        for file_idx, (img_path, label_path) in tqdm(
-            enumerate(zip(self.image_paths, self.label_paths)), 
-            desc="Loading NIfTI files", 
-            unit="files",
-            total=len(self.image_paths)
-        ):
+        for file_idx, (img_path, label_path) in enumerate(zip(self.image_paths, self.label_paths)):
             img_header = nib.load(label_path).header
             n_slices = img_header.get_data_shape()[self.slice_axis]
             for slice_idx in range(n_slices):
@@ -58,13 +52,13 @@ class NiftDataset(Dataset):
         return input_tensor, target_tensor
 
 # Get all image files
-image_files = sorted([f for f in os.listdir(IMAGE_PATH) if f.endswith(('.nii', '.nii.gz'))])
+image_files = sorted(os.listdir(IMAGE_PATH))
 image_paths = [os.path.join(IMAGE_PATH, f) for f in image_files]
 label_paths = [os.path.join(LABEL_PATH, f) for f in image_files]
 
-# Subsample 1/5 of the data
+# Subsample 1/10 of the data
 random.seed(RANDOM_SEED)
-indices = random.sample(range(len(image_paths)), len(image_paths) // 5)
+indices = random.sample(range(len(image_paths)), len(image_paths) // 10)
 image_paths = [image_paths[i] for i in indices]
 label_paths = [label_paths[i] for i in indices]
 

@@ -16,7 +16,8 @@ wandb.init(
     project="unet_gang",
     config={
         "model_save_path": MODEL_SAVE_PATH,
-        "input_filenames": INPUT_FILENAMES,
+        "file_image_path": IMAGE_PATH,
+        "file_label_path": LABEL_PATH,
         "slice_axis": SLICE_AXIS,
         "batch_size": BATCH_SIZE,
         "num_workers": NUM_WORKERS,
@@ -106,11 +107,9 @@ val_loader = DataLoader(
     pin_memory=True if DEVICE.type == "cuda" else False,
 )
 
-model = UNet(n_channels=len(INPUT_FILENAMES), n_classes=NUM_OUTPUT_CHANNELS_MODEL).to(DEVICE)
+model = UNet(n_channels=2, n_classes=1).to(DEVICE)
 criterion = nn.BCEWithLogitsLoss()
-optimizer = optim.AdamW(
-    model.parameters(), lr=LEARNING_RATE, weight_decay=0.01
-)
+optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=0.01)
 
 train_losses_history = []
 val_losses_history = []
