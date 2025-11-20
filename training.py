@@ -16,8 +16,9 @@ wandb.init(
     project="unet_gang",
     config={
         "model_save_path": MODEL_SAVE_PATH,
-        "file_image_path": IMAGE_PATH,
-        "file_label_path": LABEL_PATH,
+        "label_dir": LABEL_PATH,
+        "pet_images_dir": PET_IMAGE_PATH,
+        "ct_images_dir": CT_IMAGE_PATH,
         "slice_axis": SLICE_AXIS,
         "batch_size": BATCH_SIZE,
         "num_workers": NUM_WORKERS,
