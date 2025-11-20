@@ -11,3 +11,4 @@ unet_model.pth
 result.out
 venv/
 models/
+test/
