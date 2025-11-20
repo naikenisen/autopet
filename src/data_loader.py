@@ -15,26 +15,16 @@ class Patient:
     """Class for keeping track of a patient."""
 
     id: str
-    ctres_filepath: str
-    ct_filepath: str
     pet_filepath: str
-    suv_filepath: str
     seg_filepath: str
-    has_segmentation: Optional[bool] = None
 
     def get_input_filepath(self, filename_key):
         """Helper to get specific input modality filepath based on a key."""
         key = filename_key.upper()
         if key in ("PET.NII.GZ", "PET.NII"):
             return self.pet_filepath
-        elif key in ("CT.NII.GZ", "CT.NII"):
-            return self.ct_filepath
-        elif key in ("CTRES.NII.GZ", "CTRES.NII"):
-            return self.ctres_filepath
         elif key in ("SEG.NII.GZ", "SEG.NII"):
             return self.seg_filepath
-        elif key in ("SUV.NII.GZ", "SUV.NII"):
-            return self.suv_filepath
         else:
             raise ValueError(f"Unknown input filename key: {filename_key}")
 
@@ -47,18 +37,12 @@ class Patient:
                 files.append(os.path.join(root, filename))
 
         # filter the files to find the ones we need
-        ctres_filepath = [f for f in files if "CTres.nii.gz" or "CTres.nii" in f][0]
-        ct_filepath = [f for f in files if "CT.nii.gz" or "CT.nii" in f][0]
-        pet_filepath = [f for f in files if "PET.nii.gz" or "PET.nii" in f][0]
-        suv_filepath = [f for f in files if "SEG.nii.gz" or "SEG.nii" in f][0]
-        seg_filepath = [f for f in files if "SEG.nii.gz" or "SEG.nii" in f][0]
+        pet_filepath = [f for f in files if "PET.nii.gz" in f or "PET.nii" in f][0]
+        seg_filepath = [f for f in files if "SEG.nii.gz" in f or "SEG.nii" in f][0]
 
         return Patient(
             id=os.path.basename(folder_path),
-            ctres_filepath=ctres_filepath,
-            ct_filepath=ct_filepath,
             pet_filepath=pet_filepath,
-            suv_filepath=suv_filepath,
             seg_filepath=seg_filepath
         )
 
