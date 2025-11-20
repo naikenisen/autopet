@@ -110,6 +110,11 @@ def validate_epoch(model, loader, criterion, device):
     running_loss = 0.0
     running_dice = 0.0
     num_batches = len(loader)
+    
+    # Diagnostic counters
+    total_target_pixels = 0
+    total_positive_targets = 0
+    total_positive_preds = 0
 
     with torch.no_grad():
         for inputs, targets in loader:
@@ -120,10 +125,22 @@ def validate_epoch(model, loader, criterion, device):
             outputs_probs = torch.sigmoid(outputs_logits)
             dice = dice_coefficient(outputs_probs, targets)
             running_dice += dice.item()
+            
+            # Collect diagnostic stats
+            total_target_pixels += targets.numel()
+            total_positive_targets += targets.sum().item()
+            total_positive_preds += (outputs_probs > 0.5).sum().item()
 
     avg_val_loss = running_loss / num_batches
     avg_val_dice = running_dice / num_batches
+    
+    # Print diagnostics
+    target_pos_ratio = total_positive_targets / total_target_pixels * 100
+    pred_pos_ratio = total_positive_preds / total_target_pixels * 100
     print(f"Validation - Avg Loss: {avg_val_loss:.4f}, Avg Dice: {avg_val_dice:.4f}")
+    print(f"  → Target positives: {target_pos_ratio:.4f}% | Pred positives: {pred_pos_ratio:.4f}%")
+    print(f"  → Total positive pixels in targets: {int(total_positive_targets)}/{total_target_pixels}")
+    
     return avg_val_loss, avg_val_dice
 
 
