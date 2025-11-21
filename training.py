@@ -138,8 +138,8 @@ def validate_epoch(model, loader, criterion, device):
     target_pos_ratio = total_positive_targets / total_target_pixels * 100
     pred_pos_ratio = total_positive_preds / total_target_pixels * 100
     print(f"Validation - Avg Loss: {avg_val_loss:.4f}, Avg Dice: {avg_val_dice:.4f}")
-    print(f"  → Target positives: {target_pos_ratio:.4f}% | Pred positives: {pred_pos_ratio:.4f}%")
-    print(f"  → Total positive pixels in targets: {int(total_positive_targets)}/{total_target_pixels}")
+    print(f"Target positives: {target_pos_ratio:.4f}% | Pred positives: {pred_pos_ratio:.4f}%")
+    print(f"Total positive pixels in targets: {int(total_positive_targets)}/{total_target_pixels}")
     
     return avg_val_loss, avg_val_dice
 
